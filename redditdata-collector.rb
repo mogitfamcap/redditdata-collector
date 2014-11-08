@@ -24,7 +24,7 @@ sql_client = SqlClient::create(path_to_database, dataset, mode)
 case dataset
   when 'subreddits'
     subreddit_collector = SubredditCollector.new sql_client
-    subreddit_collector.collect mode
+    subreddit_collector.collect(mode, subreddit_regex)
   when 'links'
     link_collector = LinkCollector.new sql_client
     link_collector.collect(mode, subreddit_regex)

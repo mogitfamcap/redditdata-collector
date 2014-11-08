@@ -3,10 +3,13 @@ class SubredditCollector
        @sql_client = sql_client
   end
 
-  def collect(mode)
+  def collect(mode, subreddit_regex)
     Util.log 'Collecting subreddit data'
 
+    pattern = Regexp.new(subreddit_regex).freeze
+
     processed_count = 0
+    matching_count = 0
     last_subreddit_id = nil
 
     options = { :category => :new, :limit => 100 }
@@ -37,12 +40,15 @@ class SubredditCollector
           break
         end
 
-        @sql_client.add_subreddit(subreddit, mode)
+        if subreddit[:url].downcase.match(pattern) then
+          @sql_client.add_subreddit(subreddit, mode)
+          matching_count += 1
+        end
 
         processed_count += 1
       end
 
-      Util.log 'Collecting subreddits status: collected ' + processed_count.to_s + ' subreddits'
+      Util.log 'Collecting subreddits status: processed ' + processed_count.to_s + ' subreddits, ' + matching_count.to_s + ' matching'
       if reached_processed then
         break
       end
