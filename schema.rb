@@ -37,12 +37,13 @@ class Schema
         { :name => 'name', :type => TYPE_TEXT, :primary_key? => false},
         { :name => 'user_is_contributor', :type => TYPE_BOOLEAN, :primary_key? => false},
         { :name => 'public_description', :type => TYPE_TEXT, :primary_key? => false},
-        { :name => 'comment_score_hide_mins', :type => TYPE_BOOLEAN, :primary_key? => false},
+        { :name => 'comment_score_hide_mins', :type => TYPE_INTEGER, :primary_key? => false},
         { :name => 'subreddit_type', :type => TYPE_TEXT, :primary_key? => false},
         { :name => 'submission_type', :type => TYPE_TEXT, :primary_key? => false},
-        { :name => 'user_is_subscriber', :type => TYPE_INTEGER, :primary_key? => false},
+        { :name => 'user_is_subscriber', :type => TYPE_BOOLEAN, :primary_key? => false},
         { :name => 'kind', :type => TYPE_TEXT, :primary_key? => false},
-        { :name => 'created_at', :type => TYPE_REAL, :primary_key? => false},
+        { :name => 'created', :type => TYPE_REAL, :primary_key? => false},
+        { :name => 'created_utc', :type => TYPE_REAL, :primary_key? => false},
     ]
   end
 
@@ -87,7 +88,8 @@ class Schema
         { :name => 'num_comments', :type => TYPE_INTEGER, :primary_key? => false},
         { :name => 'distinguished', :type => TYPE_BOOLEAN, :primary_key? => false},
         { :name => 'kind', :type => TYPE_TEXT, :primary_key? => false},
-        { :name => 'created_at', :type => TYPE_REAL, :primary_key? => false},
+        { :name => 'created', :type => TYPE_REAL, :primary_key? => false},
+        { :name => 'created_utc', :type => TYPE_REAL, :primary_key? => false},
     ]
   end
 end

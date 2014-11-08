@@ -64,13 +64,13 @@ class SqlClient
     schema.each do |schema_element|
       case schema_element[:type]
         when Schema::TYPE_TEXT
-          result.push object[schema_element[:name]].to_s
+          result.push object.attributes[schema_element[:name].to_sym].to_s
         when Schema::TYPE_INTEGER
-          result.push object[schema_element[:name]]
+          result.push object.attributes[schema_element[:name].to_sym]
         when Schema::TYPE_REAL
-          result.push object[schema_element[:name]].to_i
+          result.push object.attributes[schema_element[:name].to_sym].to_i
         when Schema::TYPE_BOOLEAN
-          result.push(object[schema_element[:name]] ? 1 : 0)
+          result.push(object.attributes[schema_element[:name].to_sym] ? 1 : 0)
       end
 
     end
