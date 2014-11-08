@@ -19,7 +19,7 @@ dataset = ARGV[1]
 mode = ARGV[2]
 subreddit_regex = ARGV[3]
 
-sql_client = SqlClient::create(path_to_database, mode)
+sql_client = SqlClient::create(path_to_database, dataset, mode)
 
 case dataset
   when 'subreddits'

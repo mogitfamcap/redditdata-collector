@@ -1,10 +1,10 @@
 class SqlClient
-  def self.create(path_to_database, mode)
+  def self.create(path_to_database, dataset, mode)
     db = SQLite3::Database.new path_to_database
     client = SqlClient.new(db, mode)
 
     if mode == 'bootstrap'
-      client.bootstrap
+      client.bootstrap dataset
     end
 
     client
@@ -15,19 +15,14 @@ class SqlClient
     @mode = mode
   end
 
-  def bootstrap
+  def bootstrap(dataset)
     Util.log 'Bootstrapping database'
 
-    commands_to_drop = @db.execute("select 'drop table ' || name || ';' from sqlite_master where type = 'table';")
-    commands_to_drop.each do |command_to_drop|
-      puts command_to_drop[0]
-      @db.execute command_to_drop[0]
-    end
+    Util.log "Dropping table #{dataset}"
+    @db.execute "DROP TABLE IF EXISTS #{dataset} ;"
 
-    q = get_create_statement('subreddits', Schema.subreddit_schema)
-    @db.execute(q)
-
-    q = get_create_statement('links', Schema.link_schema)
+    Util.log "Creating table #{dataset}"
+    q = get_create_statement(dataset, Schema.get_schema_for_dataset(dataset))
     @db.execute(q)
 
     Util.log 'Bootstrapping competed'

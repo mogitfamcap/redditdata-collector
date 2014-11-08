@@ -4,6 +4,15 @@ class Schema
   TYPE_BOOLEAN = 'BOOLEAN'
   TYPE_REAL = 'REAL'
 
+  def self.get_schema_for_dataset(dataset)
+    case dataset
+      when 'subreddits'
+        return subreddit_schema
+      when 'links'
+        return link_schema
+    end
+  end
+
   def self.subreddit_schema
     [
         { :name => 'url', :type => TYPE_TEXT, :primary_key? => true},
