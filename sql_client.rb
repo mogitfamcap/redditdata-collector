@@ -18,91 +18,75 @@ class SqlClient
   def bootstrap
     puts 'Bootstrapping database'
 
-    @db.execute(
-        'CREATE TABLE subreddits'\
-        '('\
-          'url TEXT PRIMARY KEY,'\
-          'id TEXT,'\
-          'display_name TEXT,'\
-          'submit_text TEXT,'\
-          'header_img TEXT,'\
-          'description_html TEXT,'\
-          'title TEXT,'\
-          'collapse_deleted_comments INTEGER,'\
-          'over18 INTEGER,'\
-          'public_description_html TEXT,'\
-          'header_title TEXT,'\
-          'description TEXT,'\
-          'submit_link_label TEXT,'\
-          'accounts_active TEXT,'\
-          'public_traffic TEXT,'\
-          'header_size INTEGER,'\
-          'subscribers INTEGER,'\
-          'submit_text_label TEXT,'\
-          'user_is_moderator INTEGER,'\
-          'name TEXT,'\
-          'user_is_contributor INTEGER,'\
-          'public_description TEXT,'\
-          'comment_score_hide_mins INTEGER,'\
-          'subreddit_type INTEGER,'\
-          'submission_type TEXT,'\
-          'user_is_subscriber INTEGER,'\
-          'kind INTEGER,'\
-          'created_at REAL,'\
-          'updated_at REAL'\
-        ');'
-    )
+    commands_to_drop = @db.execute("select 'drop table ' || name || ';' from sqlite_master where type = 'table';")
+    commands_to_drop.each do |command_to_drop|
+      puts command_to_drop[0]
+      @db.execute command_to_drop[0]
+    end
 
-    @db.execute(
-        'CREATE TABLE links'\
-        '('\
-          'permalink TEXT PRIMARY KEY,'\
-          'domain TEXT,'\
-          'banned_by TEXT,'\
-          'media_embed TEXT,'\
-          'subreddit TEXT,'\
-          'selftext_html TEXT,'\
-          'selftext TEXT,'\
-          'likes TEXT,'\
-          'user_reports TEXT,'\
-          'secure_media TEXT,'\
-          'link_flair_text TEXT,'\
-          'id TEXT,'\
-          'gilded INTEGER,'\
-          'secure_media_embed TEXT,'\
-          'clicked INTEGER,'\
-          'report_reasons TEXT,'\
-          'author INTEGER,'\
-          'media TEXT,'\
-          'score INTEGER,'\
-          'approved_by TEXT,'\
-          'over_18 INTEGER,'\
-          'hidden INTEGER,'\
-          'thumbnail TEXT,'\
-          'subreddit_id TEXT,'\
-          'edited INTEGER,'\
-          'link_flair_css_class TEXT,'\
-          'downs INTEGER,'\
-          'mod_reports TEXT,'\
-          'saved INTEGER,'\
-          'is_self INTEGER,'\
-          'name TEXT,'\
-          'stickied INTEGER,'\
-          'url TEXT,'\
-          'author_flair_text TEXT,'\
-          'text TEXT,'\
-          'ups INTEGER,'\
-          'num_comments INTEGER,'\
-          'visited INTEGER,'\
-          'num_reports TEXT,'\
-          'distinguished   TEXT,'\
-          'kind INTEGER,'\
-          'created_at REAL,'\
-          'updated_at REAL'\
-        ');'
-    )
+    q = get_create_statement('subreddits', Schema.subreddit_schema)
+    @db.execute(q)
+
+    q = get_create_statement('links', Schema.link_schema)
+    @db.execute(q)
 
     puts 'Bootstrapping competed'
+  end
+
+  def get_create_statement(name, schema)
+    res = "CREATE TABLE #{name} ("
+    schema.each do |schema_element|
+      res += schema_element[:name] + ' ' + (schema_element[:type] != Schema::TYPE_BOOLEAN ? schema_element[:type] : Schema::TYPE_INTEGER)
+      res += schema_element[:primary_key?] ? ' PRIMARY KEY' : ''
+      res += ', '
+    end
+    res += 'updated_at REAL'
+    res += ');'
+    res
+  end
+
+  def get_insert_statement(name, schema)
+    res = "INSERT INTO #{name} VALUES ("
+    schema.each do |schema_element|
+      res += '?, '
+    end
+    res += '?);'
+    res
+  end
+
+  def get_update_statement(name, schema)
+    res = "UPDATE #{name} SET "
+    schema.each do |schema_element|
+      res += schema_element[:name] + ' = ?, '
+    end
+    res += 'updated_at = ? '
+    res += 'WHERE url = ?;'
+    res
+  end
+
+  def get_insert_values(schema, object)
+    result = []
+    schema.each do |schema_element|
+      case schema_element[:type]
+        when Schema::TYPE_TEXT
+          result.push object[schema_element[:name]].to_s
+        when Schema::TYPE_INTEGER
+          result.push object[schema_element[:name]]
+        when Schema::TYPE_REAL
+          result.push object[schema_element[:name]].to_i
+        when Schema::TYPE_BOOLEAN
+          result.push(object[schema_element[:name]] ? 1 : 0)
+      end
+
+    end
+    result.push(Time.now.to_i)
+    result
+  end
+
+  def get_update_values(schema, object)
+    res = get_insert_values(schema, object)
+    res.push(object[:url])
+    res
   end
 
   def add_subreddit(subreddit, mode)
@@ -150,253 +134,27 @@ class SqlClient
   end
 
   def insert_subreddit(subreddit)
-    q = 'INSERT INTO subreddits VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);'
-    @db.execute(
-        q,
-          subreddit[:url],
-          subreddit[:id],
-          subreddit[:display_name],
-          subreddit[:submit_text],
-          subreddit[:header_img],
-          subreddit[:description_html],
-          subreddit[:title],
-          subreddit[:collapse_deleted_comments],
-          subreddit[:over18] ? 1 : 0,
-          subreddit[:public_description_html],
-          subreddit[:header_title],
-          subreddit[:description],
-          subreddit[:submit_link_label],
-          subreddit[:accounts_active],
-          subreddit[:public_traffic] ? 1 : 0,
-          subreddit[:header_size].to_s,
-          subreddit[:subscribers],
-          subreddit[:submit_text_label],
-          subreddit[:user_is_moderator],
-          subreddit[:name],
-          subreddit[:user_is_contributor],
-          subreddit[:public_description],
-          subreddit[:comment_score_hide_mins],
-          subreddit[:subreddit_type],
-          subreddit[:submission_type],
-          subreddit[:user_is_subscriber],
-          subreddit[:kind],
-          subreddit[:created_at].to_i,
-          Time.now.to_i
-    )
+    q = get_insert_statement('subreddits', Schema.subreddit_schema)
+    v = get_insert_values(Schema.subreddit_schema, subreddit)
+    @db.execute(q, v)
   end
 
   def insert_link(link)
-    q = 'INSERT INTO links VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);'
-    @db.execute(
-        q,
-          link[:permalink],
-          link[:domain],
-          link[:banned_by],
-          link[:media_embed].to_s,
-          link[:subreddit],
-          link[:selftext_html],
-          link[:selftext],
-          link[:likes],
-          link[:user_reports].to_s,
-          link[:secure_media],
-          link[:link_flair_text],
-          link[:id],
-          link[:gilded],
-          link[:secure_media_embed],
-          link[:clicked] ? 1 : 0,
-          link[:report_reasons],
-          link[:author],
-          link[:media].to_s,
-          link[:score],
-          link[:approved_by],
-          link[:over_18] ? 1 : 0,
-          link[:hidden] ? 1 : 0,
-          link[:thumbnail],
-          link[:subreddit_id],
-          link[:edited] ? 1 : 0,
-          link[:link_flair_css_class],
-          link[:downs],
-          link[:mod_reports].to_s,
-          link[:saved] ? 1 : 0,
-          link[:is_self] ? 1 : 0,
-          link[:name],
-          link[:stickied] ? 1 : 0,
-          link[:url],
-          link[:author_flair_text],
-          link[:text],
-          link[:ups],
-          link[:num_comments],
-          link[:visited] ? 1 : 0,
-          link[:num_reports],
-          link[:distinguished  ],
-          link[:kind],
-          link[:created_at].to_i,
-          Time.now.to_i
-    )
+    q = get_insert_statement('links', Schema.link_schema)
+    v = get_insert_values(Schema.link_schema, link)
+    @db.execute(q, v)
   end
 
   def update_subreddit(subreddit)
-    q = 'UPDATE subreddits SET '\
-          'url=?, '\
-          'id=?, '\
-          'display_name=?, '\
-          'submit_text=?, '\
-          'header_img=?, '\
-          'description_html=?, '\
-          'title=?, '\
-          'collapse_deleted_comments=?, '\
-          'over18=?, '\
-          'public_description_html=?, '\
-          'header_title=?, '\
-          'description=?, '\
-          'submit_link_label=?, '\
-          'accounts_active=?, '\
-          'public_traffic=?, '\
-          'header_size=?, '\
-          'subscribers=?, '\
-          'submit_text_label=?, '\
-          'user_is_moderator=?, '\
-          'name=?, '\
-          'user_is_contributor=?, '\
-          'public_description=?, '\
-          'comment_score_hide_mins=?, '\
-          'subreddit_type=?, '\
-          'submission_type=?, '\
-          'user_is_subscriber=?, '\
-          'kind=?, '\
-          'created_at=?, '\
-          'updated_at=? '\
-        'WHERE url=?;'
-
-    @db.execute(
-        q,
-        subreddit[:url],
-        subreddit[:id],
-        subreddit[:display_name],
-        subreddit[:submit_text],
-        subreddit[:header_img],
-        subreddit[:description_html],
-        subreddit[:title],
-        subreddit[:collapse_deleted_comments],
-        subreddit[:over18] ? 1 : 0,
-        subreddit[:public_description_html],
-        subreddit[:header_title],
-        subreddit[:description],
-        subreddit[:submit_link_label],
-        subreddit[:accounts_active],
-        subreddit[:public_traffic] ? 1 : 0,
-        subreddit[:header_size].to_s,
-        subreddit[:subscribers],
-        subreddit[:submit_text_label],
-        subreddit[:user_is_moderator],
-        subreddit[:name],
-        subreddit[:user_is_contributor],
-        subreddit[:public_description],
-        subreddit[:comment_score_hide_mins],
-        subreddit[:subreddit_type],
-        subreddit[:submission_type],
-        subreddit[:user_is_subscriber],
-        subreddit[:kind],
-        subreddit[:created_at].to_i,
-        Time.now.to_i,
-        subreddit[:url]
-    )
+    q = get_update_statement('subreddits', Schema.subreddit_schema)
+    v = get_update_values(Schema.subreddit_schema, subreddit)
+    @db.execute(q, v)
   end
 
   def update_link(link)
-    q = 'UPDATE links SET '\
-          'permalink=?, '\
-          'domain=?, '\
-          'banned_by=?, '\
-          'media_embed=?, '\
-          'subreddit=?, '\
-          'selftext_html=?, '\
-          'selftext=?, '\
-          'likes=?, '\
-          'user_reports=?, '\
-          'secure_media=?, '\
-          'link_flair_text=?, '\
-          'id=?, '\
-          'gilded=?, '\
-          'secure_media_embed=?, '\
-          'clicked=?, '\
-          'report_reasons=?, '\
-          'author=?, '\
-          'media=?, '\
-          'score=?, '\
-          'approved_by=?, '\
-          'over_18=?, '\
-          'hidden=?, '\
-          'thumbnail=?, '\
-          'subreddit_id=?, '\
-          'edited=?, '\
-          'link_flair_css_class=?, '\
-          'downs=?, '\
-          'mod_reports=?, '\
-          'saved=?, '\
-          'is_self=?, '\
-          'name=?, '\
-          'stickied=?, '\
-          'url=?, '\
-          'author_flair_text=?, '\
-          'text=?, '\
-          'ups=?, '\
-          'num_comments=?, '\
-          'visited=?, '\
-          'num_reports=?, '\
-          'distinguished  =?, '\
-          'kind=?, '\
-          'created_at=?, '\
-          'updated_at=?'\
-        'WHERE permalink=?;'
-
-    @db.execute(
-        q,
-        link[:permalink],
-        link[:domain],
-        link[:banned_by],
-        link[:media_embed].to_s,
-        link[:subreddit],
-        link[:selftext_html],
-        link[:selftext],
-        link[:likes],
-        link[:user_reports].to_s,
-        link[:secure_media],
-        link[:link_flair_text],
-        link[:id],
-        link[:gilded],
-        link[:secure_media_embed],
-        link[:clicked] ? 1 : 0,
-        link[:report_reasons],
-        link[:author],
-        link[:media].to_s,
-        link[:score],
-        link[:approved_by],
-        link[:over_18] ? 1 : 0,
-        link[:hidden] ? 1 : 0,
-        link[:thumbnail],
-        link[:subreddit_id],
-        link[:edited] ? 1 : 0,
-        link[:link_flair_css_class],
-        link[:downs],
-        link[:mod_reports].to_s,
-        link[:saved] ? 1 : 0,
-        link[:is_self] ? 1 : 0,
-        link[:name],
-        link[:stickied] ? 1 : 0,
-        link[:url],
-        link[:author_flair_text],
-        link[:text],
-        link[:ups],
-        link[:num_comments],
-        link[:visited] ? 1 : 0,
-        link[:num_reports],
-        link[:distinguished  ],
-        link[:kind],
-        link[:created_at].to_i,
-        Time.now.to_i,
-        link[:permalink]
-    )
+    q = get_update_statement('links', Schema.link_schema)
+    v = get_update_values(Schema.link_schema, link)
+    @db.execute(q, v)
   end
 
   def get_last_subreddit_full_name

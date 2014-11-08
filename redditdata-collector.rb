@@ -4,6 +4,7 @@ require 'redditkit'
 require './sql_client.rb'
 require './subreddit_collector.rb'
 require './link_collector.rb'
+require './schema.rb'
 
 puts 'redditdata-collector has started'
 
