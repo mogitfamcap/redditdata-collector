@@ -16,7 +16,7 @@ class SqlClient
   end
 
   def bootstrap
-    puts 'Bootstrapping database'
+    Util.log 'Bootstrapping database'
 
     commands_to_drop = @db.execute("select 'drop table ' || name || ';' from sqlite_master where type = 'table';")
     commands_to_drop.each do |command_to_drop|
@@ -30,7 +30,7 @@ class SqlClient
     q = get_create_statement('links', Schema.link_schema)
     @db.execute(q)
 
-    puts 'Bootstrapping competed'
+    Util.log 'Bootstrapping competed'
   end
 
   def get_create_statement(name, schema)

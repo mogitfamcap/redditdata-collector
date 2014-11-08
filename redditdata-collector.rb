@@ -5,13 +5,14 @@ require './sql_client.rb'
 require './subreddit_collector.rb'
 require './link_collector.rb'
 require './schema.rb'
-
-puts 'redditdata-collector has started'
+require './util.rb'
 
 if (ARGV.size != 4) then
   puts 'Usage: reddit-collector PATH_TO_DATABASE DATASET MODE SUBREDDIT_REGEX'
   exit 1
 end
+
+Util.log 'redditdata-collector has started'
 
 path_to_database = ARGV[0]
 dataset = ARGV[1]
@@ -28,7 +29,7 @@ case dataset
     link_collector = LinkCollector.new sql_client
     link_collector.collect(mode, subreddit_regex)
   else
-    puts "dataset is not supported: #{dataset}"
+    Util.log "dataset is not supported: #{dataset}"
 end
 
-puts 'redditdata-collector has finished'
+Util.log 'redditdata-collector has finished'

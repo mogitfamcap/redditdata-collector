@@ -5,7 +5,7 @@ class LinkCollector
 
   def collect(mode, subreddit_regex)
 
-    puts 'Collecting link data'
+    Util.log 'Collecting link data'
 
     pattern = Regexp.new(subreddit_regex).freeze
     subreddit_urls = @sql_client.get_subreddits_urls
@@ -16,11 +16,11 @@ class LinkCollector
       collect_from_subreddit(mode, subreddit_url)
     end
 
-    puts 'Collecting links completed'
+    Util.log 'Collecting links completed'
   end
 
   def collect_from_subreddit(mode, subreddit_url)
-    puts 'Processing links in subreddit: ' + subreddit_url
+    Util.log 'Processing links in subreddit: ' + subreddit_url
 
     processed_count = 0
     last_link_id = nil
@@ -68,7 +68,7 @@ class LinkCollector
     end
 
 
-    puts 'Processing links in subreddit completed. Processed links: ' + processed_count.to_s
+    Util.log 'Processing links in subreddit completed. Processed links: ' + processed_count.to_s
     puts
   end
 end

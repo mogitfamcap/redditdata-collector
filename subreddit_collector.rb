@@ -4,7 +4,7 @@ class SubredditCollector
   end
 
   def collect(mode)
-    puts 'Collecting subreddit data'
+    Util.log 'Collecting subreddit data'
 
     processed_count = 0
     last_subreddit_id = nil
@@ -42,6 +42,7 @@ class SubredditCollector
         processed_count += 1
       end
 
+      Util.log 'Collecting subreddits status: collected ' + processed_count.to_s + ' subreddits'
       if reached_processed then
         break
       end
@@ -49,6 +50,6 @@ class SubredditCollector
       sleep(2)
     end
 
-    puts 'Collecting subreddits completed. Processes subreddits: ' + processed_count.to_s
+    Util.log 'Collecting subreddits completed. Processes subreddits: ' + processed_count.to_s
   end
 end
