@@ -4,6 +4,7 @@ require 'redditkit'
 require './sql_client.rb'
 require './subreddit_collector.rb'
 require './link_collector.rb'
+require './user_collector.rb'
 require './schema.rb'
 require './util.rb'
 
@@ -28,6 +29,9 @@ case dataset
   when 'links'
     link_collector = LinkCollector.new sql_client
     link_collector.collect(mode, subreddit_regex)
+  when 'users'
+    user_collector = UserCollector.new sql_client
+    user_collector.collect(mode, subreddit_regex)
   else
     Util.log "dataset is not supported: #{dataset}"
 end

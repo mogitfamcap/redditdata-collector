@@ -116,6 +116,15 @@ class SqlClient
     #end
   end
 
+  def add_user(user, mode)
+    if !user_exists?(user) then
+      insert_user user
+    else
+      update_user user
+    end
+    return
+  end
+
   def subreddit_exists?(subreddit)
     q = 'SELECT url FROM subreddits WHERE url = ?;'
     res = @db.execute(q, subreddit[:url])
@@ -125,6 +134,12 @@ class SqlClient
   def link_exists?(link)
     q = 'SELECT permalink FROM links WHERE permalink = ?;'
     res = @db.execute(q, link[:permalink])
+    !res.empty?
+  end
+
+  def user_exists?(user)
+    q = 'SELECT name FROM users WHERE name = ?;'
+    res = @db.execute(q, user[:name])
     !res.empty?
   end
 
@@ -140,6 +155,12 @@ class SqlClient
     @db.execute(q, v)
   end
 
+  def insert_user(user)
+    q = get_insert_statement('users', Schema.user_schema)
+    v = get_insert_values(Schema.user_schema, user)
+    @db.execute(q, v)
+  end
+
   def update_subreddit(subreddit)
     q = get_update_statement('subreddits', Schema.subreddit_schema)
     v = get_update_values(Schema.subreddit_schema, subreddit)
@@ -149,6 +170,12 @@ class SqlClient
   def update_link(link)
     q = get_update_statement('links', Schema.link_schema)
     v = get_update_values(Schema.link_schema, link)
+    @db.execute(q, v)
+  end
+
+  def update_user(user)
+    q = get_update_statement('users', Schema.user_schema)
+    v = get_update_values(Schema.user_schema, user)
     @db.execute(q, v)
   end
 
@@ -176,6 +203,13 @@ class SqlClient
 
   def get_subreddits_urls
     q = 'SELECT url FROM subreddits;'
+    q_res = @db.execute(q)
+
+    q_res.map { |row| row[0] }
+  end
+
+  def get_poster_names
+    q = 'SELECT DISTINCT author FROM links;'
     q_res = @db.execute(q)
 
     q_res.map { |row| row[0] }

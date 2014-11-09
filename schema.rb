@@ -10,6 +10,8 @@ class Schema
         return subreddit_schema
       when 'links'
         return link_schema
+      when 'users'
+        return user_schema
     end
   end
 
@@ -87,6 +89,23 @@ class Schema
         { :name => 'ups', :type => TYPE_INTEGER, :primary_key? => false},
         { :name => 'num_comments', :type => TYPE_INTEGER, :primary_key? => false},
         { :name => 'distinguished', :type => TYPE_BOOLEAN, :primary_key? => false},
+        { :name => 'kind', :type => TYPE_TEXT, :primary_key? => false},
+        { :name => 'created', :type => TYPE_REAL, :primary_key? => false},
+        { :name => 'created_utc', :type => TYPE_REAL, :primary_key? => false},
+    ]
+  end
+
+  def self.user_schema
+    [
+        { :name => 'name', :type => TYPE_TEXT, :primary_key? => true},
+        { :name => 'is_friend', :type => TYPE_BOOLEAN, :primary_key? => false},
+        { :name => 'hide_from_robots', :type => TYPE_BOOLEAN, :primary_key? => false},
+        { :name => 'link_karma', :type => TYPE_INTEGER, :primary_key? => false},
+        { :name => 'comment_karma', :type => TYPE_INTEGER, :primary_key? => false},
+        { :name => 'is_gold', :type => TYPE_BOOLEAN, :primary_key? => false},
+        { :name => 'is_mod', :type => TYPE_BOOLEAN, :primary_key? => false},
+        { :name => 'has_verified_email', :type => TYPE_BOOLEAN, :primary_key? => false},
+        { :name => 'id', :type => TYPE_TEXT, :primary_key? => false},
         { :name => 'kind', :type => TYPE_TEXT, :primary_key? => false},
         { :name => 'created', :type => TYPE_REAL, :primary_key? => false},
         { :name => 'created_utc', :type => TYPE_REAL, :primary_key? => false},
