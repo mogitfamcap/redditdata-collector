@@ -127,19 +127,19 @@ class SqlClient
 
   def subreddit_exists?(subreddit)
     q = 'SELECT url FROM subreddits WHERE url = ?;'
-    res = @db.execute(q, subreddit[:url])
+    res = @db.execute(q, subreddit.attributes[:url])
     !res.empty?
   end
 
   def link_exists?(link)
     q = 'SELECT permalink FROM links WHERE permalink = ?;'
-    res = @db.execute(q, link[:permalink])
+    res = @db.execute(q, link.attributes[:permalink])
     !res.empty?
   end
 
   def user_exists?(user)
     q = 'SELECT name FROM users WHERE name = ?;'
-    res = @db.execute(q, user[:name])
+    res = @db.execute(q, user.attributes[:name])
     !res.empty?
   end
 
