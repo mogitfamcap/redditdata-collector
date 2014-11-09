@@ -11,16 +11,19 @@ class LinkCollector
     subreddit_urls = @sql_client.get_subreddits_urls
 
     selected_subreddit_urls = subreddit_urls.select { |subreddit_url| subreddit_url.downcase.match(pattern) }
+    total_subreddit_count = selected_subreddit_urls.length
+    processed_subreddit_count = 0
 
     selected_subreddit_urls.each do |subreddit_url|
+      Util.log "Processing links in subreddit #{processed_subreddit_count + 1}/#{total_subreddit_count}. Url: #{subreddit_url}"
       collect_from_subreddit(mode, subreddit_url)
+      processed_subreddit_count += 1
     end
 
     Util.log 'Collecting links completed'
   end
 
   def collect_from_subreddit(mode, subreddit_url)
-    Util.log 'Processing links in subreddit: ' + subreddit_url
 
     processed_count = 0
     last_link_id = nil
@@ -64,11 +67,11 @@ class LinkCollector
         break
       end
 
+      Util.log 'Collecting links in subreddit status: processed ' + processed_count.to_s + ' links'
       sleep(2)
     end
 
 
     Util.log 'Processing links in subreddit completed. Processed links: ' + processed_count.to_s
-    puts
   end
 end
