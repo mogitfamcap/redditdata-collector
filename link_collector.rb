@@ -7,7 +7,7 @@ class LinkCollector
 
     Util.log 'Collecting link data'
 
-    pattern = Regexp.new(subreddit_regex).freeze
+    pattern = Regexp.new(subreddit_regex.downcase).freeze
     subreddit_urls = @sql_client.get_subreddits_urls
 
     selected_subreddit_urls = subreddit_urls.select { |subreddit_url| subreddit_url.downcase.match(pattern) }
