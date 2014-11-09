@@ -4,6 +4,34 @@ class SubredditCollector
   end
 
   def collect(mode, subreddit_regex)
+    if includes_wildcard? subreddit_regex then
+      collect_all(mode, subreddit_regex)
+    else
+      collect_one_by_one(mode, subreddit_regex)
+    end
+  end
+
+  def collect_one_by_one(mode, subreddit_regex)
+    Util.log 'Collecting subreddit data: one by one'
+
+    processed_count = 0
+
+    subreddits_to_process = subreddit_regex.split '|'
+    total_subreddit_count = subreddits_to_process.length
+
+    subreddits_to_process.each do |subreddit_to_process|
+      Util.log "Processing subreddit #{processed_count + 1}/#{total_subreddit_count}. Url: #{subreddit_to_process}"
+      processed_count += 1
+
+      res = RedditKit.subreddit subreddit_to_process.sub('/r/', '')
+      @sql_client.add_subreddit(res, mode) unless res.nil?
+      sleep 2
+    end
+
+    Util.log 'Collecting subreddits completed. Processes subreddits: ' + processed_count.to_s
+  end
+
+  def collect_all(mode, subreddit_regex)
     Util.log 'Collecting subreddit data'
 
     pattern = Regexp.new(subreddit_regex).freeze
@@ -57,6 +85,10 @@ class SubredditCollector
     end
 
     Util.log 'Collecting subreddits completed. Processes subreddits: ' + processed_count.to_s
+  end
+
+  def includes_wildcard?(subreddit_regex)
+    subreddit_regex.include?('*') || subreddit_regex.include?('.') || subreddit_regex.include?('[') || subreddit_regex.include?('+')
   end
 
   def safe_get_subreddits(options)
