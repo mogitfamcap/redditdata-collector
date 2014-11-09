@@ -25,7 +25,7 @@ class SubredditCollector
         options[:after] = last_subreddit_id
       end
 
-      subreddits = RedditKit.subreddits(options)
+      subreddits = safe_get_subreddits(options)
 
       if subreddits.empty? then
         break
@@ -57,5 +57,27 @@ class SubredditCollector
     end
 
     Util.log 'Collecting subreddits completed. Processes subreddits: ' + processed_count.to_s
+  end
+
+  def safe_get_subreddits(options)
+    made_attempts = 0
+
+    while (made_attempts < 3)
+      begin
+        made_attempts += 1
+        subreddits = RedditKit.subreddits(options)
+        if subreddits.nil?
+          raise 'Subreddits are nil'
+        end
+        return subreddits
+      rescue Exception => e
+        Util.log e.message
+        Util.log e.backtrace.inspect
+        Util.log 'Sleeping for 10 seconds after error'
+        sleep 10 unless made_attempts == 3
+      end
+    end
+
+    raise 'Unable to get subreddits after 3 attempts'
   end
 end
