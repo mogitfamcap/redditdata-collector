@@ -116,6 +116,14 @@ class SqlClient
     #end
   end
 
+  def add_userlink(userlink, mode)
+    if !userlink_exists?(userlink) then
+      insert_userlink userlink
+    else
+      update_userlink userlink
+    end
+  end
+
   def add_user(user, mode)
     if !user_exists?(user) then
       insert_user user
@@ -137,6 +145,12 @@ class SqlClient
     !res.empty?
   end
 
+  def userlink_exists?(userlink)
+    q = 'SELECT permalink FROM userlinks WHERE permalink = ?;'
+    res = @db.execute(q, userlink.attributes[:permalink])
+    !res.empty?
+  end
+
   def user_exists?(user)
     q = 'SELECT name FROM users WHERE name = ?;'
     res = @db.execute(q, user.attributes[:name])
@@ -155,6 +169,12 @@ class SqlClient
     @db.execute(q, v)
   end
 
+  def insert_userlink(userlink)
+    q = get_insert_statement('userlinks', Schema.link_schema)
+    v = get_insert_values(Schema.link_schema, userlink)
+    @db.execute(q, v)
+  end
+
   def insert_user(user)
     q = get_insert_statement('users', Schema.user_schema)
     v = get_insert_values(Schema.user_schema, user)
@@ -169,6 +189,12 @@ class SqlClient
 
   def update_link(link)
     q = get_update_statement('links', Schema.link_schema)
+    v = get_update_values(Schema.link_schema, link)
+    @db.execute(q, v)
+  end
+
+  def update_userlink(userlink)
+    q = get_update_statement('userlinks', Schema.link_schema)
     v = get_update_values(Schema.link_schema, link)
     @db.execute(q, v)
   end
@@ -210,6 +236,13 @@ class SqlClient
 
   def get_poster_names
     q = 'SELECT DISTINCT author FROM links;'
+    q_res = @db.execute(q)
+
+    q_res.map { |row| row[0] }
+  end
+
+  def get_all_user_names
+    q = 'SELECT name FROM users;'
     q_res = @db.execute(q)
 
     q_res.map { |row| row[0] }

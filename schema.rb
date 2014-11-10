@@ -12,6 +12,8 @@ class Schema
         return link_schema
       when 'users'
         return user_schema
+      when 'userlinks'
+        return link_schema
     end
   end
 
