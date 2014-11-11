@@ -29,7 +29,13 @@ class SubredditCollector
         Util.log "#{total_delay} seconds have passed"
       end
       with_retries(:max_tries => 5, :handler => handler, :base_sleep_seconds => 5, :max_sleep_seconds => 30, :rescue => [StandardError]) do |attempt|
-        res = RedditKit.subreddit subreddit_to_process.sub('/r/', '')
+        begin
+          res = RedditKit.subreddit subreddit_to_process.sub('/r/', '')
+        rescue RedditKit::PermissionDenied
+          Util.log 'PermissionDenied: skipping subreddit'
+          sleep 2
+          next
+        end
       end
 
       @sql_client.add_subreddit(res, mode) unless res.nil?
