@@ -47,12 +47,13 @@ class UserlinkCollector
 
       found_link = false
       links.each do |link|
+        fullname = link[:kind] + '_' + link[:id]
+        last_link_id = fullname
+
         if !link.is_a? RedditKit::Link then
           next
         end
         found_link = true
-        fullname = link[:kind] + '_' + link[:id]
-        last_link_id = fullname
 
         @sql_client.add_userlink(link, mode)
 

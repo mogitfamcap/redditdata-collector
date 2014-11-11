@@ -195,7 +195,7 @@ class SqlClient
 
   def update_userlink(userlink)
     q = get_update_statement('userlinks', Schema.link_schema)
-    v = get_update_values(Schema.link_schema, link)
+    v = get_update_values(Schema.link_schema, userlink)
     @db.execute(q, v)
   end
 
