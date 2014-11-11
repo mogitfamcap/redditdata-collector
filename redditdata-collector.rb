@@ -1,5 +1,6 @@
 require 'sqlite3'
 require 'redditkit'
+require 'retries'
 
 require './sql_client.rb'
 require './subreddit_collector.rb'

@@ -23,7 +23,15 @@ class SubredditCollector
       Util.log "Processing subreddit #{processed_count + 1}/#{total_subreddit_count}. Url: #{subreddit_to_process}"
       processed_count += 1
 
-      res = RedditKit.subreddit subreddit_to_process.sub('/r/', '')
+      res = nil
+      handler = Proc.new do |exception, attempt_number, total_delay|
+        Util.log exception.message
+        Util.log "#{total_delay} seconds have passed"
+      end
+      with_retries(:max_tries => 5, :handler => handler, :base_sleep_seconds => 5, :max_sleep_seconds => 30, :rescue => [StandardError]) do |attempt|
+        res = RedditKit.subreddit subreddit_to_process.sub('/r/', '')
+      end
+
       @sql_client.add_subreddit(res, mode) unless res.nil?
       sleep 2
     end
@@ -55,7 +63,7 @@ class SubredditCollector
 
       subreddits = safe_get_subreddits(options)
 
-      if subreddits.empty? then
+      if subreddits.nil? | subreddits.empty? then
         break
       end
 
@@ -92,24 +100,12 @@ class SubredditCollector
   end
 
   def safe_get_subreddits(options)
-    made_attempts = 0
-
-    while (made_attempts < 3)
-      begin
-        made_attempts += 1
-        subreddits = RedditKit.subreddits(options)
-        if subreddits.nil?
-          raise 'Subreddits are nil'
-        end
-        return subreddits
-      rescue Exception => e
-        Util.log e.message
-        Util.log e.backtrace.inspect
-        Util.log 'Sleeping for 10 seconds after error'
-        sleep 10 unless made_attempts == 3
-      end
+    handler = Proc.new do |exception, attempt_number, total_delay|
+      Util.log e.message
+      Util.log "#{total_delay} seconds have passed"
     end
-
-    raise 'Unable to get subreddits after 3 attempts'
+    with_retries(:max_tries => 5, :handler => handler,  :base_sleep_seconds => 5, :rescue => [StandardError]) do |attempt|
+      (1 / 0)
+    end
   end
 end

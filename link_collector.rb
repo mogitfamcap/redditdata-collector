@@ -41,7 +41,14 @@ class LinkCollector
         options[:after] = last_link_id
       end
 
-      links = RedditKit.links(subreddit_url.sub('/r/', ''), options)
+      links = nil
+      handler = Proc.new do |exception, attempt_number, total_delay|
+        Util.log exception.message
+        Util.log "#{total_delay} seconds have passed"
+      end
+      with_retries(:max_tries => 5, :handler => handler, :base_sleep_seconds => 5, :max_sleep_seconds => 30, :rescue => [StandardError]) do |attempt|
+        links = RedditKit.links(subreddit_url.sub('/r/', ''), options)
+      end
 
       if links.empty? then
         sleep(2)

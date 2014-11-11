@@ -19,7 +19,14 @@ class UserCollector
         next
       end
 
-      res = RedditKit.user(poster)
+      res = nil
+      handler = Proc.new do |exception, attempt_number, total_delay|
+        Util.log exception.message
+        Util.log "#{total_delay} seconds have passed"
+      end
+      with_retries(:max_tries => 5, :handler => handler, :base_sleep_seconds => 5, :max_sleep_seconds => 30, :rescue => [StandardError]) do |attempt|
+        res = RedditKit.user(poster)
+      end
 
       if !res.nil? then
         @sql_client.add_user(res, mode)
