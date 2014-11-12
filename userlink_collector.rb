@@ -45,6 +45,12 @@ class UserlinkCollector
         links = RedditKit.user_content(user, options)
       end
 
+      if links.nil? then
+        Util.log 'WARNING: links is nil'
+        sleep(2)
+        break
+      end
+
       found_link = false
       links.each do |link|
         fullname = link[:kind] + '_' + link[:id]
