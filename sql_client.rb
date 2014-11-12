@@ -55,7 +55,7 @@ class SqlClient
       res += schema_element[:name] + ' = ?, '
     end
     res += 'updated_at = ? '
-    res += 'WHERE url = ?;'
+    res += 'WHERE ' + get_primary_key_name(schema) + '= ?;'
     res
   end
 
@@ -80,8 +80,20 @@ class SqlClient
 
   def get_update_values(schema, object)
     res = get_insert_values(schema, object)
-    res.push(object[:url])
+    res.push(get_primary_key_value(schema, object))
     res
+  end
+
+  def get_primary_key_name(schema)
+    schema.each do |schema_element|
+      if schema_element[:primary_key?] then
+        return schema_element[:name]
+      end
+    end
+  end
+
+  def get_primary_key_value(schema, object)
+    object.attributes[get_primary_key_name(schema).to_sym]
   end
 
   def add_subreddit(subreddit, mode)
