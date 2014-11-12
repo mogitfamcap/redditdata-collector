@@ -23,10 +23,11 @@ mode = ARGV[2]
 subreddit_regex = ARGV[3]
 
 sql_client = SqlClient::create(path_to_database, dataset, mode)
+redditkit = RedditKit
 
 case dataset
   when 'subreddits'
-    subreddit_collector = SubredditCollector.new sql_client
+    subreddit_collector = SubredditCollector.new(sql_client, redditkit)
     subreddit_collector.collect(mode, subreddit_regex)
   when 'links'
     link_collector = LinkCollector.new sql_client

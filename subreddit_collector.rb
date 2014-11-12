@@ -1,6 +1,7 @@
 class SubredditCollector
-  def initialize(sql_client)
-       @sql_client = sql_client
+  def initialize(sql_client, redditkit)
+    @sql_client = sql_client
+    @redditkit = redditkit
   end
 
   def collect(mode, subreddit_regex)
@@ -30,16 +31,16 @@ class SubredditCollector
       end
       with_retries(:max_tries => 5, :handler => handler, :base_sleep_seconds => 5, :max_sleep_seconds => 30, :rescue => [StandardError]) do |attempt|
         begin
-          res = RedditKit.subreddit subreddit_to_process.sub('/r/', '')
+          res = @redditkit.subreddit subreddit_to_process.sub('/r/', '')
         rescue RedditKit::PermissionDenied
           Util.log 'PermissionDenied: skipping subreddit'
-          sleep 2
+          Util.sleep 2
           next
         end
       end
 
       @sql_client.add_subreddit(res, mode) unless res.nil?
-      sleep 2
+      Util.sleep 2
     end
 
     Util.log 'Collecting subreddits completed. Processes subreddits: ' + processed_count.to_s
@@ -95,7 +96,7 @@ class SubredditCollector
         break
       end
 
-      sleep(2)
+      Util.sleep 2
     end
 
     Util.log 'Collecting subreddits completed. Processes subreddits: ' + processed_count.to_s
