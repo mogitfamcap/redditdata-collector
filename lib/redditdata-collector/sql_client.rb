@@ -128,6 +128,28 @@ class SqlClient
     #end
   end
 
+  def bulk_add_links(links, mode)
+    links_to_insert = []
+    links_to_update = []
+
+    links.each do |link|
+      if link_exists?(link) then
+        links_to_update.push(link)
+      else
+        links_to_insert.push(link)
+      end
+    end
+
+    @db.transaction
+      links_to_insert.each do |link|
+        insert_link link
+      end
+    links_to_update.each do |link|
+      update_link link
+    end
+    @db.commit
+  end
+
   def add_userlink(userlink, mode)
     if !userlink_exists?(userlink) then
       insert_userlink userlink

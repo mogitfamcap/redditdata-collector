@@ -55,6 +55,7 @@ class LinkCollector
         break
       end
 
+      links_to_add = []
       links.each do |link|
         fullname = link[:kind] + '_' + link[:id]
         last_link_id = fullname
@@ -64,10 +65,10 @@ class LinkCollector
           break
         end
 
-        @sql_client.add_link(link, mode)
-
+        links_to_add.push link
         processed_count += 1
       end
+      @sql_client.bulk_add_links(links_to_add, mode)
 
       if reached_processed then
         sleep(2)
