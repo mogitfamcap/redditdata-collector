@@ -1,6 +1,7 @@
 class LinkCollector
-  def initialize(sql_client)
+  def initialize(sql_client, redditkit)
     @sql_client = sql_client
+    @redditkit = redditkit
   end
 
   def collect(mode, subreddit_regex)
@@ -47,11 +48,11 @@ class LinkCollector
         Util.log "#{total_delay} seconds have passed"
       end
       with_retries(:max_tries => 5, :handler => handler, :base_sleep_seconds => 5, :max_sleep_seconds => 30, :rescue => [StandardError]) do |attempt|
-        links = RedditKit.links(subreddit_url.sub('/r/', ''), options)
+        links = @redditkit.links(subreddit_url.sub('/r/', ''), options)
       end
 
       if links.empty? then
-        sleep(2)
+        Util.sleep(2)
         break
       end
 
@@ -71,14 +72,13 @@ class LinkCollector
       @sql_client.bulk_add_links(links_to_add, mode)
 
       if reached_processed then
-        sleep(2)
+        Util.sleep(2)
         break
       end
 
       Util.log 'Collecting links in subreddit status: processed ' + processed_count.to_s + ' links'
-      sleep(2)
+      Util.sleep(2)
     end
-
 
     Util.log 'Processing links in subreddit completed. Processed links: ' + processed_count.to_s
   end
