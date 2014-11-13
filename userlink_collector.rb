@@ -6,7 +6,6 @@ class UserlinkCollector
   def collect(mode, subreddit_regex)
 
     Util.log 'Collecting user link data'
-
     users = @sql_client.get_all_user_names
 
     total_user_count = users.length
@@ -37,12 +36,17 @@ class UserlinkCollector
       end
 
       links = nil
-      handler = Proc.new do |exception, attempt_number, total_delay|
-        Util.log exception.message
-        Util.log "#{total_delay} seconds have passed"
-      end
-      with_retries(:max_tries => 5, :handler => handler, :base_sleep_seconds => 5, :max_sleep_seconds => 30, :rescue => [StandardError]) do |attempt|
-        links = RedditKit.user_content(user, options)
+
+      begin
+        handler = Proc.new do |exception, attempt_number, total_delay|
+          Util.log exception.message
+          Util.log "#{total_delay} seconds have passed"
+        end
+        with_retries(:max_tries => 5, :handler => handler, :base_sleep_seconds => 10, :max_sleep_seconds => 100, :rescue => [StandardError]) do |attempt|
+          links = RedditKit.user_content(user, options)
+        end
+      rescue StandardError
+        Util.log "Failed retrieving userlinks for user #{user}"
       end
 
       if links.nil? then
