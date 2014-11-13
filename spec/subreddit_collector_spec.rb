@@ -3,8 +3,7 @@ require 'redditkit'
 require 'rspec'
 require 'rspec/mocks'
 
-require File.dirname(__FILE__) + '/../subreddit_collector.rb'
-require File.dirname(__FILE__) + '/../util.rb'
+require File.dirname(__FILE__) + '/../lib/redditdata-collector.rb'
 
 describe SubredditCollector do
   before do

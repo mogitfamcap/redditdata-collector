@@ -1,0 +1,15 @@
+#!/usr/bin/ruby
+
+require File.dirname(__FILE__) + '/../lib/redditdata-collector.rb'
+
+if (ARGV.size != 4) then
+  puts 'Usage: reddit-collector PATH_TO_DATABASE DATASET MODE SUBREDDIT_REGEX'
+  exit 1
+end
+
+path_to_database = ARGV[0]
+dataset = ARGV[1]
+mode = ARGV[2]
+subreddit_regex = ARGV[3]
+
+RedditdataCollector::collect(path_to_database, dataset, mode, subreddit_regex)
