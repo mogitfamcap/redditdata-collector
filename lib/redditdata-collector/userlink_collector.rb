@@ -56,6 +56,7 @@ class UserlinkCollector
       end
 
       found_link = false
+      userlinks_to_add = []
       links.each do |link|
         fullname = link[:kind] + '_' + link[:id]
         last_link_id = fullname
@@ -65,10 +66,12 @@ class UserlinkCollector
         end
         found_link = true
 
-        @sql_client.add_userlink(link, mode)
+        userlinks_to_add.push link
 
         processed_count += 1
       end
+
+      @sql_client.bulk_add_userlinks(userlinks_to_add, mode)
 
       if !found_link then
         sleep(2)
