@@ -54,14 +54,4 @@ class SubredditCollector
   def includes_wildcard?(subreddit_regex)
     subreddit_regex.include?('*') || subreddit_regex.include?('.') || subreddit_regex.include?('[') || subreddit_regex.include?('+')
   end
-
-  def safe_get_subreddits(options)
-    handler = Proc.new do |exception, attempt_number, total_delay|
-      Util.log e.message
-      Util.log "#{total_delay} seconds have passed"
-    end
-    with_retries(:max_tries => 5, :handler => handler,  :base_sleep_seconds => 5, :rescue => [StandardError]) do |attempt|
-      (1 / 0)
-    end
-  end
 end
