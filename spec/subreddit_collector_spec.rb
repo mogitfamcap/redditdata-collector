@@ -22,6 +22,15 @@ describe SubredditCollector do
 
     subreddit_collector.collect('full', '/r/funny|/r/wtf')
   end
+
+  it 'Should raise error because wildcards aren\'t supported' do
+    sql_client = double()
+    redditkit = RedditKitMockForSubreddits.new
+
+    subreddit_collector = SubredditCollector.new(sql_client, redditkit)
+
+    expect { subreddit_collector.collect('full', '/r/funny*') }.to raise_error(StandardError)
+  end
 end
 
 class RedditKitMockForSubreddits
