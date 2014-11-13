@@ -12,6 +12,8 @@ class SubredditCollector
     end
   end
 
+  private
+
   def collect_one_by_one(mode, subreddit_regex)
     Util.log 'Collecting subreddit data: one by one'
 
