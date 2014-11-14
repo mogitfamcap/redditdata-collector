@@ -85,35 +85,19 @@ class SqlClient
   end
 
   def add_subreddit(subreddit, mode)
-    #if mode == 'bootstrap' || mode == 'incremental'
-    #    insert_subreddit subreddit
-    #  return
-    #end
-
-    #if mode == 'full'
-      if !exists?('subreddits', subreddit) then
-        insert_subreddit subreddit
-      else
-        update_subreddit subreddit
-      end
-      return
-    #end
+    if !exists?('subreddits', subreddit) then
+      insert_item('subreddits', subreddit)
+    else
+      update_subreddit subreddit
+    end
   end
 
   def add_link(link, mode)
-    #if mode == 'bootstrap' || mode == 'incremental'
-    #  insert_link link
-    #  return
-    #end
-
-    #if mode == 'full'
-      if !exists?('links', link) then
-        insert_link link
-      else
-        update_link link
-      end
-      return
-    #end
+    if !exists?('links', link) then
+      insert_item('links', link)
+    else
+      update_link link
+    end
   end
 
   def bulk_add_links(links, mode)
@@ -130,7 +114,7 @@ class SqlClient
 
     @db.transaction
       links_to_insert.each do |link|
-        insert_link link
+        insert_item('links', link)
       end
     links_to_update.each do |link|
       update_link link
@@ -152,7 +136,7 @@ class SqlClient
 
     @db.transaction
     userlinks_to_insert.each do |userlink|
-      insert_userlink userlink
+      insert_item('userlinks', userlink)
     end
     userlinks_to_update.each do |userlink|
       update_userlink userlink
@@ -162,7 +146,7 @@ class SqlClient
 
   def add_userlink(userlink, mode)
     if !exists?('userlinks', userlink) then
-      insert_userlink userlink
+      insert_item('userlinks', userlink)
     else
       update_userlink userlink
     end
@@ -170,7 +154,7 @@ class SqlClient
 
   def add_user(user, mode)
     if !exists?('users', user) then
-      insert_user user
+      insert_item('users', user)
     else
       update_user user
     end
@@ -187,27 +171,9 @@ class SqlClient
     !res.empty?
   end
 
-  def insert_subreddit(subreddit)
-    q = get_insert_statement('subreddits', Schema.subreddit_schema)
-    v = get_insert_values(Schema.subreddit_schema, subreddit)
-    @db.execute(q, v)
-  end
-
-  def insert_link(link)
-    q = get_insert_statement('links', Schema.link_schema)
-    v = get_insert_values(Schema.link_schema, link)
-    @db.execute(q, v)
-  end
-
-  def insert_userlink(userlink)
-    q = get_insert_statement('userlinks', Schema.link_schema)
-    v = get_insert_values(Schema.link_schema, userlink)
-    @db.execute(q, v)
-  end
-
-  def insert_user(user)
-    q = get_insert_statement('users', Schema.user_schema)
-    v = get_insert_values(Schema.user_schema, user)
+  def insert_item(dataset, object)
+    q = get_insert_statement(dataset, Schema.get_schema_for_dataset(dataset))
+    v = get_insert_values(Schema.get_schema_for_dataset(dataset), object)
     @db.execute(q, v)
   end
 
