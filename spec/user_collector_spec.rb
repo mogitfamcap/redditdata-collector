@@ -11,17 +11,29 @@ describe UserCollector do
     Util.nosleep = true
   end
 
-  it 'Should collect users' do
+  it 'Should collect users in full mode' do
     sql_client = double()
     redditkit = RedditKitMockForUsers.new
     user_collector = UserCollector.new(sql_client, redditkit)
 
+    allow(sql_client).to receive(:get_poster_names).and_return(['username_1', 'username_2'])
+    expect(sql_client).to receive(:add_user).with(redditkit.user('username_1'), Mode::FULL)
+    expect(sql_client).to receive(:add_user).with(redditkit.user('username_2'), Mode::FULL)
+
+    user_collector.collect(Mode::FULL, '/r/funny|/r/wtf')
+  end
+
+  it 'Should collect users in incremental mode' do
+    sql_client = double()
+    redditkit = RedditKitMockForUsers.new
+    user_collector = UserCollector.new(sql_client, redditkit)
 
     allow(sql_client).to receive(:get_poster_names).and_return(['username_1', 'username_2'])
-    expect(sql_client).to receive(:add_user).with(redditkit.user('username_1'), 'full')
-    expect(sql_client).to receive(:add_user).with(redditkit.user('username_2'), 'full')
+    allow(sql_client).to receive(:get_all_user_names).and_return(['username_1'])
 
-    user_collector.collect('full', '/r/funny|/r/wtf')
+    expect(sql_client).to receive(:add_user).with(redditkit.user('username_2'), Mode::INCREMENTAL)
+
+    user_collector.collect(Mode::INCREMENTAL, '/r/funny|/r/wtf')
   end
 end
 

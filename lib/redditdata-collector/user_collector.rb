@@ -9,7 +9,7 @@ class UserCollector
 
     processed_count = 0
 
-    posters = @sql_client.get_poster_names
+    posters = get_users_to_process(mode)
     total_poster_count = posters.length
 
     posters.each do |poster|
@@ -36,5 +36,16 @@ class UserCollector
     end
 
     Util.log 'Collecting users completed. Processes users: ' + processed_count.to_s
+  end
+
+  private
+
+  def get_users_to_process(mode)
+    case mode
+      when Mode::INCREMENTAL
+        @sql_client.get_poster_names - @sql_client.get_all_user_names
+      else
+        @sql_client.get_poster_names
+    end
   end
 end
