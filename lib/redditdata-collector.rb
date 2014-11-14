@@ -35,7 +35,7 @@ module RedditdataCollector
           Util.log "dataset is not supported: #{dataset}"
       end
 
-      Util.log 'redditdata-collector-collector has finished'
+      Util.log 'redditdata-collector has finished'
     end
   end
 end
