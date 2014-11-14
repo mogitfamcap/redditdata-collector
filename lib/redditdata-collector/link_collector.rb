@@ -31,12 +31,6 @@ class LinkCollector
 
     options = { :category => :new, :limit => 100 }
 
-    if mode == 'incremental' then
-      latest_processed_fullname = @sql_client.get_last_link_in_subreddit_full_name(subreddit_url.sub('/r/', ''))
-    end
-
-    reached_processed = false
-
     while true do
       if !last_link_id.nil? then
         options[:after] = last_link_id
@@ -61,20 +55,10 @@ class LinkCollector
         fullname = link[:kind] + '_' + link[:id]
         last_link_id = fullname
 
-        if fullname == latest_processed_fullname then
-          reached_processed = true
-          break
-        end
-
         links_to_add.push link
         processed_count += 1
       end
       @sql_client.bulk_add_links(links_to_add, mode)
-
-      if reached_processed then
-        Util.sleep(2)
-        break
-      end
 
       Util.log 'Collecting links in subreddit status: processed ' + processed_count.to_s + ' links'
       Util.sleep(2)
