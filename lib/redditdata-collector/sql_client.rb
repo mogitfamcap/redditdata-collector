@@ -103,7 +103,7 @@ class SqlClient
     #end
 
     #if mode == 'full'
-      if !subreddit_exists?(subreddit) then
+      if !exists?('subreddits', subreddit) then
         insert_subreddit subreddit
       else
         update_subreddit subreddit
@@ -119,7 +119,7 @@ class SqlClient
     #end
 
     #if mode == 'full'
-      if !link_exists?(link) then
+      if !exists?('links', link) then
         insert_link link
       else
         update_link link
@@ -133,7 +133,7 @@ class SqlClient
     links_to_update = []
 
     links.each do |link|
-      if link_exists?(link) then
+      if exists?('links', link) then
         links_to_update.push(link)
       else
         links_to_insert.push(link)
@@ -155,7 +155,7 @@ class SqlClient
     userlinks_to_update = []
 
     userlinks.each do |userlink|
-      if userlink_exists?(userlink) then
+      if exists?('userlinks', userlink) then
         userlinks_to_update.push(userlink)
       else
         userlinks_to_insert.push(userlink)
@@ -173,7 +173,7 @@ class SqlClient
   end
 
   def add_userlink(userlink, mode)
-    if !userlink_exists?(userlink) then
+    if !exists?('userlinks', userlink) then
       insert_userlink userlink
     else
       update_userlink userlink
@@ -181,7 +181,7 @@ class SqlClient
   end
 
   def add_user(user, mode)
-    if !user_exists?(user) then
+    if !exists?('users', user) then
       insert_user user
     else
       update_user user
@@ -189,27 +189,13 @@ class SqlClient
     return
   end
 
-  def subreddit_exists?(subreddit)
-    q = 'SELECT url FROM subreddits WHERE url = ?;'
-    res = @db.execute(q, subreddit.attributes[:url])
-    !res.empty?
-  end
+  def exists?(dataset, object)
+    schema = Schema.get_schema_for_dataset dataset
+    primary_key_name = get_primary_key_name schema
+    primary_key_value = get_primary_key_value(schema, object)
 
-  def link_exists?(link)
-    q = 'SELECT permalink FROM links WHERE permalink = ?;'
-    res = @db.execute(q, link.attributes[:permalink])
-    !res.empty?
-  end
-
-  def userlink_exists?(userlink)
-    q = 'SELECT permalink FROM userlinks WHERE permalink = ?;'
-    res = @db.execute(q, userlink.attributes[:permalink])
-    !res.empty?
-  end
-
-  def user_exists?(user)
-    q = 'SELECT name FROM users WHERE name = ?;'
-    res = @db.execute(q, user.attributes[:name])
+    q = "SELECT #{primary_key_name} FROM #{dataset} WHERE #{primary_key_name} = ?;"
+    res = @db.execute(q, primary_key_value)
     !res.empty?
   end
 
