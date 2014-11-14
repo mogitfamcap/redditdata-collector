@@ -1,6 +1,7 @@
 class UserCollector
-  def initialize(sql_client)
-       @sql_client = sql_client
+  def initialize(sql_client, redditkit)
+    @sql_client = sql_client
+    @redditkit = redditkit
   end
 
   def collect(mode, subreddit_regex)
@@ -25,13 +26,13 @@ class UserCollector
         Util.log "#{total_delay} seconds have passed"
       end
       with_retries(:max_tries => 5, :handler => handler, :base_sleep_seconds => 5, :max_sleep_seconds => 30, :rescue => [StandardError]) do |attempt|
-        res = RedditKit.user(poster)
+        res = @redditkit.user(poster)
       end
 
       if !res.nil? then
         @sql_client.add_user(res, mode)
       end
-      sleep 2
+      Util.sleep 2
     end
 
     Util.log 'Collecting users completed. Processes users: ' + processed_count.to_s
