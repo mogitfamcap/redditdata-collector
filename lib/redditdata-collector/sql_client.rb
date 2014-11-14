@@ -17,7 +17,7 @@ class SqlClient
     if !exists?('subreddits', subreddit) then
       insert_item('subreddits', subreddit)
     else
-      update_subreddit subreddit
+      update_item('subreddits', subreddit)
     end
   end
 
@@ -25,7 +25,7 @@ class SqlClient
     if !exists?('links', link) then
       insert_item('links', link)
     else
-      update_link link
+      update_item('links', link)
     end
   end
 
@@ -46,7 +46,7 @@ class SqlClient
         insert_item('links', link)
       end
     links_to_update.each do |link|
-      update_link link
+      update_item('links', link)
     end
     @db.commit
   end
@@ -68,7 +68,7 @@ class SqlClient
       insert_item('userlinks', userlink)
     end
     userlinks_to_update.each do |userlink|
-      update_userlink userlink
+      update_item('userlinks', userlink)
     end
     @db.commit
   end
@@ -77,7 +77,7 @@ class SqlClient
     if !exists?('userlinks', userlink) then
       insert_item('userlinks', userlink)
     else
-      update_userlink userlink
+      update_item('userlinks', userlink)
     end
   end
 
@@ -85,33 +85,8 @@ class SqlClient
     if !exists?('users', user) then
       insert_item('users', user)
     else
-      update_user user
+      update_item('users', user)
     end
-    return
-  end
-
-  def update_subreddit(subreddit)
-    q = get_update_statement('subreddits', Schema.subreddit_schema)
-    v = get_update_values(Schema.subreddit_schema, subreddit)
-    @db.execute(q, v)
-  end
-
-  def update_link(link)
-    q = get_update_statement('links', Schema.link_schema)
-    v = get_update_values(Schema.link_schema, link)
-    @db.execute(q, v)
-  end
-
-  def update_userlink(userlink)
-    q = get_update_statement('userlinks', Schema.link_schema)
-    v = get_update_values(Schema.link_schema, userlink)
-    @db.execute(q, v)
-  end
-
-  def update_user(user)
-    q = get_update_statement('users', Schema.user_schema)
-    v = get_update_values(Schema.user_schema, user)
-    @db.execute(q, v)
   end
 
   def get_last_subreddit_full_name
@@ -250,6 +225,12 @@ class SqlClient
   def insert_item(dataset, object)
     q = get_insert_statement(dataset, Schema.get_schema_for_dataset(dataset))
     v = get_insert_values(Schema.get_schema_for_dataset(dataset), object)
+    @db.execute(q, v)
+  end
+
+  def update_item(dataset, object)
+    q = get_update_statement(dataset, Schema.get_schema_for_dataset(dataset))
+    v = get_update_values(Schema.get_schema_for_dataset(dataset), object)
     @db.execute(q, v)
   end
 end
