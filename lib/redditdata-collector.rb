@@ -29,7 +29,7 @@ module RedditdataCollector
           user_collector = UserCollector.new(sql_client, redditkit)
           user_collector.collect(mode, subreddit_regex)
         when 'userlinks'
-          userlinks_collector = UserlinkCollector.new sql_client
+          userlinks_collector = UserlinkCollector.new(sql_client, redditkit)
           userlinks_collector.collect(mode, subreddit_regex)
         else
           Util.log "dataset is not supported: #{dataset}"
