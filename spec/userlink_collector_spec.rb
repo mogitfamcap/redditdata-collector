@@ -11,7 +11,7 @@ describe UserlinkCollector do
     Util.nosleep = true
   end
 
-  it 'Should collect links' do
+  it 'Should collect userlinks in full mode' do
     sql_client = double(SqlClient)
     redditkit = RedditKitMockForUserlinks.new
 
@@ -20,20 +20,20 @@ describe UserlinkCollector do
 
     expect(sql_client).to receive(:bulk_add_userlinks).exactly(2).times
 
-    userlink_collector.collect('full', '/r/funny|/r/wtf')
+    userlink_collector.collect(Mode::FULL, '/r/funny|/r/wtf')
   end
-end
 
-class RedditKitMockForUsers
-  def user(user_name)
-    case user_name
-      when 'username_1'
-        return RedditKit::User.new({:data => {:name => 'username_1'}})
-      when 'username_2'
-        return RedditKit::User.new({:data => {:name => 'username_2'}})
-      else
-        return nil
-    end
+  it 'Should collect userlinks in incremental mode' do
+    sql_client = double(SqlClient)
+    redditkit = RedditKitMockForUserlinks.new
+
+    userlink_collector = UserlinkCollector.new(sql_client, redditkit)
+    allow(sql_client).to receive(:get_all_user_names).and_return(['username_1', 'username_2'])
+    allow(sql_client).to receive(:get_all_users_with_userlinks).and_return(['username_1'])
+
+    expect(sql_client).to receive(:bulk_add_userlinks).exactly(1).times
+
+    userlink_collector.collect(Mode::INCREMENTAL, '/r/funny|/r/wtf')
   end
 end
 

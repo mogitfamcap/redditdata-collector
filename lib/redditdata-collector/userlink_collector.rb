@@ -7,7 +7,7 @@ class UserlinkCollector
   def collect(mode, subreddit_regex)
 
     Util.log 'Collecting user link data'
-    users = @sql_client.get_all_user_names
+    users = get_users_to_process(mode)
 
     total_user_count = users.length
     processed_user_count = 0
@@ -26,10 +26,6 @@ class UserlinkCollector
     last_link_id = nil
 
     options = { :category => :submitted, :limit => 100 }
-
-    if mode == 'incremental' then
-      #latest_processed_fullname = @sql_client.get_last_link_in_subreddit_full_name(subreddit_url.sub('/r/', ''))
-    end
 
     while true do
       if !last_link_id.nil? then
@@ -90,5 +86,16 @@ class UserlinkCollector
 
 
     Util.log 'Processing links of user completed. Processed links: ' + processed_count.to_s
+  end
+
+  private
+
+  def get_users_to_process(mode)
+    case mode
+      when Mode::INCREMENTAL
+        @sql_client.get_all_user_names - @sql_client.get_all_users_with_userlinks
+      else
+        @sql_client.get_all_user_names
+    end
   end
 end

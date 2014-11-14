@@ -289,4 +289,11 @@ class SqlClient
 
     q_res.map { |row| row[0] }
   end
+
+  def get_all_users_with_userlinks
+    q = 'SELECT DISTINCT author FROM userlinks;'
+    q_res = @db.execute(q)
+
+    q_res.map { |row| row[0] }
+  end
 end
