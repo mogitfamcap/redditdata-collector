@@ -26,7 +26,7 @@ module RedditdataCollector
           link_collector = LinkCollector.new(sql_client, redditkit)
           link_collector.collect(mode, subreddit_regex)
         when 'users'
-          user_collector = UserCollector.new sql_client
+          user_collector = UserCollector.new(sql_client, redditkit)
           user_collector.collect(mode, subreddit_regex)
         when 'userlinks'
           userlinks_collector = UserlinkCollector.new sql_client
