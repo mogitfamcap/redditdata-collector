@@ -19,7 +19,7 @@ describe LinkCollector do
 
     links_collector = LinkCollector.new(sql_client, redditkit)
 
-    expect(sql_client).to receive(:bulk_add_links).exactly(2).times
+    expect(sql_client).to receive(:bulk_add_items).exactly(2).times
 
     links_collector.collect('full', '/r/funny|/r/wtf')
   end

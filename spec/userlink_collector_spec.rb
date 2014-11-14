@@ -18,7 +18,7 @@ describe UserlinkCollector do
     userlink_collector = UserlinkCollector.new(sql_client, redditkit)
     allow(sql_client).to receive(:get_all_user_names).and_return(['username_1', 'username_2'])
 
-    expect(sql_client).to receive(:bulk_add_userlinks).exactly(2).times
+    expect(sql_client).to receive(:bulk_add_items).exactly(2).times
 
     userlink_collector.collect(Mode::FULL, '/r/funny|/r/wtf')
   end
@@ -31,7 +31,7 @@ describe UserlinkCollector do
     allow(sql_client).to receive(:get_all_user_names).and_return(['username_1', 'username_2'])
     allow(sql_client).to receive(:get_all_users_with_userlinks).and_return(['username_1'])
 
-    expect(sql_client).to receive(:bulk_add_userlinks).exactly(1).times
+    expect(sql_client).to receive(:bulk_add_items).exactly(1).times
 
     userlink_collector.collect(Mode::INCREMENTAL, '/r/funny|/r/wtf')
   end

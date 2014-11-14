@@ -58,7 +58,7 @@ class LinkCollector
         links_to_add.push link
         processed_count += 1
       end
-      @sql_client.bulk_add_links(links_to_add, mode)
+      @sql_client.bulk_add_items('links', links_to_add)
 
       Util.log 'Collecting links in subreddit status: processed ' + processed_count.to_s + ' links'
       Util.sleep(2)

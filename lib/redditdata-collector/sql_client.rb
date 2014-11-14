@@ -21,46 +21,24 @@ class SqlClient
     end
   end
 
-  def bulk_add_links(links, mode)
-    links_to_insert = []
-    links_to_update = []
+  def bulk_add_items(dataset, objects)
+    items_to_insert = []
+    items_to_update = []
 
-    links.each do |link|
-      if exists?('links', link) then
-        links_to_update.push(link)
+    objects.each do |object|
+      if exists?(dataset, object) then
+        items_to_update.push(object)
       else
-        links_to_insert.push(link)
+        items_to_insert.push(object)
       end
     end
 
     @db.transaction
-      links_to_insert.each do |link|
-        insert_item('links', link)
-      end
-    links_to_update.each do |link|
-      update_item('links', link)
+    items_to_insert.each do |object|
+      insert_item(dataset, object)
     end
-    @db.commit
-  end
-
-  def bulk_add_userlinks(userlinks, mode)
-    userlinks_to_insert = []
-    userlinks_to_update = []
-
-    userlinks.each do |userlink|
-      if exists?('userlinks', userlink) then
-        userlinks_to_update.push(userlink)
-      else
-        userlinks_to_insert.push(userlink)
-      end
-    end
-
-    @db.transaction
-    userlinks_to_insert.each do |userlink|
-      insert_item('userlinks', userlink)
-    end
-    userlinks_to_update.each do |userlink|
-      update_item('userlinks', userlink)
+    items_to_update.each do |object|
+      update_item(dataset, object)
     end
     @db.commit
   end

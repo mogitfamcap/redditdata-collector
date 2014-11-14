@@ -78,7 +78,7 @@ class UserlinkCollector
         break
       end
 
-      @sql_client.bulk_add_userlinks(userlinks_to_add, mode)
+      @sql_client.bulk_add_items('userlinks', userlinks_to_add)
 
       Util.log 'Collecting links of user status: processed ' + processed_count.to_s + ' links'
       Util.sleep(2)
