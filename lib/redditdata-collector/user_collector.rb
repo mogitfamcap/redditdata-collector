@@ -30,7 +30,7 @@ class UserCollector
       end
 
       if !res.nil? then
-        @sql_client.add_user(res, mode)
+        @sql_client.add_item('users', res)
       end
       Util.sleep 2
     end

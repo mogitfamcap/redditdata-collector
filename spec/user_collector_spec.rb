@@ -17,8 +17,8 @@ describe UserCollector do
     user_collector = UserCollector.new(sql_client, redditkit)
 
     allow(sql_client).to receive(:get_poster_names).and_return(['username_1', 'username_2'])
-    expect(sql_client).to receive(:add_user).with(redditkit.user('username_1'), Mode::FULL)
-    expect(sql_client).to receive(:add_user).with(redditkit.user('username_2'), Mode::FULL)
+    expect(sql_client).to receive(:add_item).with('users', redditkit.user('username_1'))
+    expect(sql_client).to receive(:add_item).with('users', redditkit.user('username_2'))
 
     user_collector.collect(Mode::FULL, '/r/funny|/r/wtf')
   end
@@ -31,7 +31,7 @@ describe UserCollector do
     allow(sql_client).to receive(:get_poster_names).and_return(['username_1', 'username_2'])
     allow(sql_client).to receive(:get_all_user_names).and_return(['username_1'])
 
-    expect(sql_client).to receive(:add_user).with(redditkit.user('username_2'), Mode::INCREMENTAL)
+    expect(sql_client).to receive(:add_item).with('users', redditkit.user('username_2'))
 
     user_collector.collect(Mode::INCREMENTAL, '/r/funny|/r/wtf')
   end

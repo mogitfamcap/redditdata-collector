@@ -13,19 +13,11 @@ class SqlClient
     @mode = mode
   end
 
-  def add_subreddit(subreddit, mode)
-    if !exists?('subreddits', subreddit) then
-      insert_item('subreddits', subreddit)
+  def add_item(dataset, object)
+    if !exists?(dataset, object) then
+      insert_item(dataset, object)
     else
-      update_item('subreddits', subreddit)
-    end
-  end
-
-  def add_link(link, mode)
-    if !exists?('links', link) then
-      insert_item('links', link)
-    else
-      update_item('links', link)
+      update_item(dataset, object)
     end
   end
 
@@ -71,22 +63,6 @@ class SqlClient
       update_item('userlinks', userlink)
     end
     @db.commit
-  end
-
-  def add_userlink(userlink, mode)
-    if !exists?('userlinks', userlink) then
-      insert_item('userlinks', userlink)
-    else
-      update_item('userlinks', userlink)
-    end
-  end
-
-  def add_user(user, mode)
-    if !exists?('users', user) then
-      insert_item('users', user)
-    else
-      update_item('users', user)
-    end
   end
 
   def get_last_subreddit_full_name

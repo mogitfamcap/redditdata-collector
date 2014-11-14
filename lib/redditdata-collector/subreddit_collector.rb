@@ -41,7 +41,7 @@ class SubredditCollector
         end
       end
 
-      @sql_client.add_subreddit(res, mode) unless res.nil?
+      @sql_client.add_item('subreddits', res) unless res.nil?
       Util.sleep 2
     end
 

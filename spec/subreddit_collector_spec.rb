@@ -17,8 +17,8 @@ describe SubredditCollector do
 
     subreddit_collector = SubredditCollector.new(sql_client, redditkit)
 
-    expect(sql_client).to receive(:add_subreddit).with(redditkit.subreddit('funny'), 'full')
-    expect(sql_client).to receive(:add_subreddit).with(redditkit.subreddit('wtf'), 'full')
+    expect(sql_client).to receive(:add_item).with('subreddits', redditkit.subreddit('funny'))
+    expect(sql_client).to receive(:add_item).with('subreddits', redditkit.subreddit('wtf'))
 
     subreddit_collector.collect('full', '/r/funny|/r/wtf')
   end
