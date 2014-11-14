@@ -1,6 +1,7 @@
 class UserlinkCollector
-  def initialize(sql_client)
+  def initialize(sql_client, redditkit)
     @sql_client = sql_client
+    @redditkit = redditkit
   end
 
   def collect(mode, subreddit_regex)
@@ -43,7 +44,7 @@ class UserlinkCollector
           Util.log "#{total_delay} seconds have passed"
         end
         with_retries(:max_tries => 5, :handler => handler, :base_sleep_seconds => 10, :max_sleep_seconds => 100, :rescue => [StandardError]) do |attempt|
-          links = RedditKit.user_content(user, options)
+          links = @redditkit.user_content(user, options)
         end
       rescue StandardError
         Util.log "Failed retrieving userlinks for user #{user}"
@@ -51,7 +52,12 @@ class UserlinkCollector
 
       if links.nil? then
         Util.log 'WARNING: links is nil'
-        sleep(2)
+        Util.sleep(2)
+        break
+      end
+
+      if links.empty? then
+        Util.sleep(2)
         break
       end
 
@@ -71,15 +77,15 @@ class UserlinkCollector
         processed_count += 1
       end
 
-      @sql_client.bulk_add_userlinks(userlinks_to_add, mode)
-
       if !found_link then
-        sleep(2)
+        Util.sleep(2)
         break
       end
 
+      @sql_client.bulk_add_userlinks(userlinks_to_add, mode)
+
       Util.log 'Collecting links of user status: processed ' + processed_count.to_s + ' links'
-      sleep(2)
+      Util.sleep(2)
     end
 
 
