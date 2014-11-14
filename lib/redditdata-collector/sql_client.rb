@@ -55,7 +55,7 @@ class SqlClient
       res += schema_element[:name] + ' = ?, '
     end
     res += 'updated_at = ? '
-    res += 'WHERE ' + get_primary_key_name(schema) + '= ?;'
+    res += 'WHERE ' + Schema.get_primary_key_name(schema) + '= ?;'
     res
   end
 
@@ -80,20 +80,8 @@ class SqlClient
 
   def get_update_values(schema, object)
     res = get_insert_values(schema, object)
-    res.push(get_primary_key_value(schema, object))
+    res.push(Schema.get_primary_key_value(schema, object))
     res
-  end
-
-  def get_primary_key_name(schema)
-    schema.each do |schema_element|
-      if schema_element[:primary_key?] then
-        return schema_element[:name]
-      end
-    end
-  end
-
-  def get_primary_key_value(schema, object)
-    object.attributes[get_primary_key_name(schema).to_sym]
   end
 
   def add_subreddit(subreddit, mode)
@@ -191,8 +179,8 @@ class SqlClient
 
   def exists?(dataset, object)
     schema = Schema.get_schema_for_dataset dataset
-    primary_key_name = get_primary_key_name schema
-    primary_key_value = get_primary_key_value(schema, object)
+    primary_key_name = Schema.get_primary_key_name schema
+    primary_key_value = Schema.get_primary_key_value(schema, object)
 
     q = "SELECT #{primary_key_name} FROM #{dataset} WHERE #{primary_key_name} = ?;"
     res = @db.execute(q, primary_key_value)

@@ -1,8 +1,10 @@
+# TODO Consider turning into a module
 class Schema
   TYPE_TEXT = 'TEXT'
   TYPE_INTEGER = 'INTEGER'
   TYPE_BOOLEAN = 'BOOLEAN'
   TYPE_REAL = 'REAL'
+
 
   def self.get_schema_for_dataset(dataset)
     case dataset
@@ -112,5 +114,17 @@ class Schema
         { :name => 'created', :type => TYPE_REAL, :primary_key? => false},
         { :name => 'created_utc', :type => TYPE_REAL, :primary_key? => false},
     ]
+  end
+
+  def self.get_primary_key_name(schema)
+    schema.each do |schema_element|
+      if schema_element[:primary_key?] then
+        return schema_element[:name]
+      end
+    end
+  end
+
+  def self.get_primary_key_value(schema, object)
+    object.attributes[get_primary_key_name(schema).to_sym]
   end
 end
