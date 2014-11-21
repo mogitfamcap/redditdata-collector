@@ -93,8 +93,6 @@ class SqlClient
     q_res.map { |row| row[0] }
   end
 
-  private
-
   def setup_tables(dataset, mode)
     Util.log 'Setting up tables'
 
@@ -109,6 +107,8 @@ class SqlClient
 
     Util.log 'Setting up tables competed'
   end
+
+  private
 
   def get_create_statement(name, schema)
     res = "CREATE TABLE IF NOT EXISTS #{name} ("
