@@ -1,3 +1,4 @@
+require 'spec_helper'
 require 'retries'
 require 'redditkit'
 require 'rspec'
