@@ -16,6 +16,8 @@ class Schema
         return user_schema
       when 'userlinks'
         return link_schema
+      else
+        raise ArgumentError, "Unknown dataset: #{dataset}"
     end
   end
 
