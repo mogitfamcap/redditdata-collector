@@ -15,7 +15,7 @@ require File.dirname(__FILE__) + '/redditdata-collector/dataset.rb'
 module RedditdataCollector
   class << self
     def collect(path_to_database, dataset, mode, subreddit_regex)
-      Util.log 'redditdata-collector-collector has started'
+      Util.log 'redditdata-collector has started'
 
       sql_client = SqlClient::create(path_to_database, dataset, mode)
       redditkit = RedditKit
