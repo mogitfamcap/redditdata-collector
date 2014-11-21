@@ -1,16 +1,15 @@
 class SqlClient
   def self.create(path_to_database, dataset, mode)
     db = SQLite3::Database.new path_to_database
-    client = SqlClient.new(db, mode)
+    client = SqlClient.new(db)
 
     client.setup_tables(dataset, mode) unless mode.nil? || dataset.nil?
 
     client
   end
 
-  def initialize(db, mode)
+  def initialize(db)
     @db = db
-    @mode = mode
   end
 
   def add_item(dataset, object)
