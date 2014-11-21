@@ -2,14 +2,42 @@
 
 require File.dirname(__FILE__) + '/../lib/redditdata-collector.rb'
 
-if (ARGV.size != 4) then
-  puts 'Usage: reddit-collector PATH_TO_DATABASE DATASET MODE SUBREDDIT_REGEX'
+def print_usage_and_die
+  puts 'usage: reddit-collector <command> [<args>]'
+  puts
+  puts 'Commands:'
+  puts '    collect     collect data'
+  puts '    purge       purge data'
   exit 1
 end
 
-path_to_database = ARGV[0]
-dataset = ARGV[1]
-mode = ARGV[2]
-subreddit_regex = ARGV[3]
+if ARGV.size < 1 then
+    print_usage_and_die
+end
 
-RedditdataCollector::collect(path_to_database, dataset, mode, subreddit_regex)
+command = ARGV[0]
+
+case command
+    when 'collect'
+        if (ARGV.size != 5) then
+          print_usage_and_die
+        end
+
+        path_to_database = ARGV[1]
+        dataset = ARGV[2]
+        mode = ARGV[3]
+        subreddit_regex = ARGV[4]
+
+        RedditdataCollector::collect(path_to_database, dataset, mode, subreddit_regex)
+    when 'purge'
+        if (ARGV.size != 3) then
+          print_usage_and_die
+        end
+
+        path_to_database = ARGV[1]
+        subreddit_regex = ARGV[2]
+
+        RedditdataCollector::purge(path_to_database, subreddit_regex)
+    else
+        print_usage_and_die
+end

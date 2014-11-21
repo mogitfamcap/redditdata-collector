@@ -39,5 +39,11 @@ module RedditdataCollector
 
       Util.log 'redditdata-collector has finished'
     end
+
+    def purge(path_to_database, subreddit_regex)
+      Util.log 'redditdata-collector purge has started'
+
+      Util.log 'redditdata-collector purge has finished'
+    end
   end
 end
