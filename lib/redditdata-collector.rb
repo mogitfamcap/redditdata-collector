@@ -11,6 +11,8 @@ require File.dirname(__FILE__) + '/redditdata-collector/userlink_collector.rb'
 require File.dirname(__FILE__) + '/redditdata-collector/schema.rb'
 require File.dirname(__FILE__) + '/redditdata-collector/util.rb'
 require File.dirname(__FILE__) + '/redditdata-collector/dataset.rb'
+require File.dirname(__FILE__) + '/redditdata-collector/purger.rb'
+require File.dirname(__FILE__) + '/redditdata-collector/subreddit.rb'
 
 module RedditdataCollector
   class << self
@@ -40,8 +42,12 @@ module RedditdataCollector
       Util.log 'redditdata-collector has finished'
     end
 
-    def purge(path_to_database, subreddit_regex)
+    def purge(path_to_database, subreddit_url)
       Util.log 'redditdata-collector purge has started'
+
+      sql_client = SqlClient::create(path_to_database, nil, nil)
+      purger = Purger.new(sql_client)
+      purger.purge(subreddit_url)
 
       Util.log 'redditdata-collector purge has finished'
     end

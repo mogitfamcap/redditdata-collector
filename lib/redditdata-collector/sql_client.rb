@@ -3,7 +3,7 @@ class SqlClient
     db = SQLite3::Database.new path_to_database
     client = SqlClient.new(db, mode)
 
-    client.setup_tables(dataset, mode)
+    client.setup_tables(dataset, mode) unless mode.nil? || dataset.nil?
 
     client
   end
@@ -106,6 +106,38 @@ class SqlClient
     @db.execute(q)
 
     Util.log 'Setting up tables competed'
+  end
+
+  def get_subreddit_users(subreddit)
+    q = 'SELECT DISTINCT author FROM links WHERE subreddit = ?;'
+    q_res = @db.execute(q, subreddit)
+    q_res.map { |row| row[0] }
+  end
+
+  def get_link_subreddits_by_user(user)
+    q = 'SELECT DISTINCT subreddit FROM links WHERE author = ?;'
+    q_res = @db.execute(q, user)
+    q_res.map { |row| row[0] }
+  end
+
+  def delete_subreddit(subreddit_url)
+    q = 'DELETE FROM subreddits WHERE url = ?;'
+    @db.execute(q, subreddit_url)
+  end
+
+  def delete_links(subreddit)
+    q = 'DELETE FROM links WHERE subreddit = ?;'
+    @db.execute(q, subreddit)
+  end
+
+  def delete_user(user)
+    q = 'DELETE FROM users WHERE name = ?;'
+    @db.execute(q, user)
+  end
+
+  def delete_userlinks(user)
+    q = 'DELETE FROM userlinks WHERE author = ?;'
+    @db.execute(q, user)
   end
 
   private

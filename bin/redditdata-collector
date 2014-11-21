@@ -35,9 +35,9 @@ case command
         end
 
         path_to_database = ARGV[1]
-        subreddit_regex = ARGV[2]
+        subreddit = ARGV[2]
 
-        RedditdataCollector::purge(path_to_database, subreddit_regex)
+        RedditdataCollector::purge(path_to_database, subreddit)
     else
         print_usage_and_die
 end
